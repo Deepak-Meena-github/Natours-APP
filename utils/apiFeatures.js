@@ -20,14 +20,16 @@ class APIFeatures {
 
   sort() {
     if (this.queryString.sort) {
+      console.log(this.queryString.sort); // Corrected typo
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
       this.query = this.query.sort('-createdAt');
     }
-
+  
     return this;
   }
+  
 
   limitFields() {
     if (this.queryString.fields) {
