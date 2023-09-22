@@ -11,8 +11,13 @@ const xss=require('xss-clean');
 const { Mongoose } = require('mongoose');
 const hpp=require("hpp");
 const app = express();
+const reviewRouter=require('./routes/reviewRoutes');
+const path = require('path');
 
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 // 1) MIDDLEWARES
 // set security HTTP headers 
 app.use(helmet())
@@ -50,8 +55,8 @@ app.use(hpp(
 ))
 // serving static files
 
-app.use(express.static(`${__dirname}/public`));
-  // test middleware 
+// app.use(express.static(`${__dirname}/public`));
+//   // test middleware 
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
@@ -60,8 +65,13 @@ app.use((req, res, next) => {
 });
 
 // 3) ROUTES
+app.use('/', (req, res) => {
+  res.render('base'); // Renders the 'example.pug' template
+});
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
+
 app.all(  "*",(req,res,next)=>{
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 })

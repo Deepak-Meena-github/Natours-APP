@@ -10,6 +10,8 @@ const util = require('util');
 const { promisify } = require('util');
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
+const { crossOriginResourcePolicy } = require('helmet');
+const { Console } = require('console');
 
 const signToken = id => {
   return jwt.sign(
@@ -52,7 +54,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-
+console.log(email);
   // 1) Check if email and password exist
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
@@ -118,6 +120,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // Check if the user's role matches any of the allowed roles
+    console.log(req.user.role);
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError('You do not have permission to perform this action', 403)
