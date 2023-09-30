@@ -12,7 +12,10 @@ const { Mongoose } = require('mongoose');
 const hpp=require("hpp");
 const app = express();
 const reviewRouter=require('./routes/reviewRoutes');
+const viewRouter=require('./routes/viewRoutes');
+
 const path = require('path');
+
 
 
 app.set('view engine', 'pug');
@@ -65,9 +68,8 @@ app.use((req, res, next) => {
 });
 
 // 3) ROUTES
-app.use('/', (req, res) => {
-  res.render('base'); // Renders the 'example.pug' template
-});
+app.use('/', viewRouter);
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
