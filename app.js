@@ -10,6 +10,7 @@ const mongoSanitize=require("express-mongo-sanitize");
 const xss=require('xss-clean');
 const { Mongoose } = require('mongoose');
 const hpp=require("hpp");
+const cookieParser=require('cookie-parser');
 const app = express();
 const reviewRouter=require('./routes/reviewRoutes');
 const viewRouter=require('./routes/viewRoutes');
@@ -22,8 +23,41 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 // 1) MIDDLEWARES
-// set security HTTP headers 
-app.use(helmet())
+// set security HTTP headers
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'", 'data:', 'blob:'],
+ 
+      baseUri: ["'self'"],
+ 
+      fontSrc: ["'self'", 'https:', 'data:'],
+ 
+      scriptSrc: ["'self'", 'https://*.cloudflare.com'],
+ 
+      scriptSrc: ["'self'", 'https://*.stripe.com'],
+ 
+      scriptSrc: ["'self'", 'http:', 'https://*.mapbox.com', 'data:'],
+ 
+      frameSrc: ["'self'", 'https://*.stripe.com'],
+ 
+      objectSrc: ["'none'"],
+ 
+      styleSrc: ["'self'", 'https:', 'unsafe-inline'],
+ 
+      workerSrc: ["'self'", 'data:', 'blob:'],
+ 
+      childSrc: ["'self'", 'blob:'],
+ 
+      imgSrc: ["'self'", 'data:', 'blob:'],
+ 
+      connectSrc: ["'self'", 'blob:', 'https://*.mapbox.com'],
+ 
+      upgradeInsecureRequests: [],
+    },
+  })
+);
+// app.use(helmet())
 // Devlopinging longing 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -38,6 +72,7 @@ app.use('/api', limiter);
 // body parser,reading data from body into req.body
 
 app.use(express.json({limit:"10kb"}));
+app.use(cookieParser());
 // data senatization against no sql query injection 
 
 app.use(mongoSanitize());
@@ -63,6 +98,8 @@ app.use(hpp(
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
+
  
   next();
 });

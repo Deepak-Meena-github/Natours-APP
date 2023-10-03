@@ -24,8 +24,15 @@ exports.getTour=catchAsync(async(req,res)=>{
       });
       
    res.status(200).render('tour',{
-       tiltle:'the Forest Hiker tour',
+       tiltle:`${tour.name} Tour`,
        tour
 
    })
 })
+exports.getLoginForm = (req, res) => {
+    res.status(200).render('login', {
+        title: "Log IN to your account", // Fix the typo here from "tiltle" to "title"
+    });
+};
+
+ 

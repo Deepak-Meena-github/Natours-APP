@@ -54,16 +54,20 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-console.log(email);
-  // 1) Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
-  }
-  // 2) Check if user exists && password is correct
   const user = await User.findOne({ email }).select('+password');
 
+
+  // 1) Check if email and password exist
+  if (!email || !password) {
+    
+    return next(new AppError('Please provide email and password!', 400));
+
+  }
+  // 2) Check if user exists && password is correct
+
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new appError('incorrect email or password', 401));
+    console.log(email,password,user,"deepak");
+    return next(new AppError('incorrect email or password', 401));
   }
 
   
@@ -80,6 +84,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if(req.cookies.jwt){
+    token=req.cookie.jwt;
   }
 
   if (!token) {
@@ -113,6 +119,36 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // 1) verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 3) Check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+}
 // Import the necessary modules
 // Make sure the path to AppError is correct
 
